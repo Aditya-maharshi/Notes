@@ -491,7 +491,123 @@ git log --oneline
     
 - **Key Takeaway:** `git status` should be your reflex. Run it often to understand the state of your three zones.
     
+### Part 4.5: The "How" - Managing Files
 
+This part covers essential commands for managing individual files: seeing your changes before you stage them and properly telling Git when you've moved or deleted something.
+
+#### Seeing Your Changes (git diff)
+
+You've edited a file, but before you run `git add`, you want to see exactly _what_ you changed. Did you just fix a typo or accidentally delete a whole function? `git diff` is your magnifying glass.
+
+1. See what's in your Working Directory (but not Staged).
+
+This is the most common use. It compares your "workbench" (Working Directory) to your "photographer's canvas" (Staging Area).
+
+Bash
+
+Bash
+
+```
+# This shows all changes you haven't staged yet
+git diff
+```
+
+Expected Output:
+
+Diff
+
+```
+diff --git a/story.txt b/story.txt
+index 5a1b3c4..e9a8f7b 100644
+--- a/story.txt
++++ b/story.txt
+@@ -1,1 +1,2 @@
+ Once upon a time...
++A dragon appeared.
+```
+
+- `--- a/story.txt` shows the "old" version (what's in the staging area/last commit).
+    
+- `+++ b/story.txt` shows the "new" version (what's in your working directory).
+    
+- `+A dragon appeared.` shows the line you added. (A `-` sign would show a line you removed).
+    
+
+2. See what's Staged (but not Committed).
+
+You've used git add, and now you want to double-check what's in that snapshot you're about to commit. This compares your Staging Area to your Repository (last commit).
+
+Bash
+
+Bash
+
+```
+# Shows changes that are staged and ready to be committed
+git diff --staged
+```
+
+**Pro Tip:** Run `git diff` before `git add` and `git diff --staged` before `git commit`. This two-step check helps you craft perfect, atomic commits.
+
+#### Renaming & Deleting Files (git mv, git rm)
+
+What happens if you just use your computer's `mv` or `rm` command?
+
+- `rm story.txt`: Git will see this as a "deleted" file in your working directory, and you'd still have to `git add` that change.
+    
+- `mv story.txt chapter1.txt`: Git will get confused. It will see an "untracked" file named `chapter1.txt` and a "missing" file named `story.txt`.
+    
+
+Using Git's commands is cleaner because they _automatically stage the change_ for you.
+
+**1. Deleting a file from Git's tracking:**
+
+Bash
+
+Bash
+
+```
+# This removes the file from your working directory AND stages the deletion
+git rm story.txt
+```
+
+Now, if you run `git status`, you'll see:
+
+```
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        deleted:    story.txt
+```
+
+**2. Renaming a file in Git:**
+
+Bash
+
+Bash
+
+```
+# This renames the file AND stages the move
+git mv story.txt chapter1.txt
+```
+
+Now, `git status` will show:
+
+```
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        renamed:    story.txt -> chapter1.txt
+```
+
+---
+
+#### Section 4.5: Mini Checklist & Key Takeaways
+
+☐ Check Your Work: Do you know how to use git diff to see your unstaged changes?
+
+☐ Check Your Staging: Do you know how to use git diff --staged to see what you're about to commit?
+
+☐ Manage Files: Can you explain why git rm and git mv are better than the standard rm and mv commands for a Git repo?
+
+- **Key Takeaway**: `git diff` is your safety check to ensure you're only staging and committing the exact changes you intend to. `git rm` and `git mv` are the proper way to tell Git about deletions or renames, as they stage the changes for you.
 ---
 
 ## **Part 5: Parallel Universes - Branching and Merging**
@@ -948,6 +1064,87 @@ Teams usually adopt a standard strategy for how they use branches. Here are the 
 - **Common Mistake:** Opening a massive Pull Request. A PR with thousands of lines of changes is almost impossible to review properly. Keep your branches small, focused on a single logical change, and your PRs easy to digest.
     
 - **Key Takeaway:** The **Pull Request** is the central hub for team collaboration. It's where code is reviewed, discussed, and quality is ensured before it becomes part of the main project.
+
+### Part 7.5: The GitHub Ecosystem
+
+Beyond just storing code, platforms like GitHub provide a full ecosystem for managing projects. The two most important features you'll use with Pull Requests are **Issues** (for tracking work) and **Releases** (for shipping your work).
+
+#### GitHub Issues: The Project To-Do List
+
+A Pull Request (PR) explains _how_ you made a change3. An Issue explains _why_ the change was needed in the first place.
+
+- **What it is:** An "Issue" is a numbered ticket used to track a single unit of work. This could be a bug report, a feature request, or a simple task.
+    
+- **Analogy:** If the repository is the project, Issues are the to-do list or bug-tracker sticky notes for the whole team.
+    
+
+**The Issue Lifecycle:**
+
+1. **Creation:** A user (or a teammate) reports a bug: "User login fails with special characters." This becomes **Issue #123**.
+    
+2. **Discussion:** The team discusses the bug in the Issue's comment thread. They confirm it's a real bug and assign it to a developer.
+    
+3. **Branching:** You create a branch to fix it, often naming the branch after the issue: `git switch -c fix-login-bug-123`.
+    
+4. **Linking:** You make your commits and open a Pull Request. In the PR description, you write a magic phrase like **"Closes #123"** or **"Fixes #123"**.
+    
+5. **Closing:** As soon as your Pull Request is merged into `main`, GitHub sees that magic phrase and **automatically closes Issue #123**.
+    
+
+This creates a perfect, traceable link. Anyone looking at the closed Issue #123 can see exactly which PR fixed it, and anyone looking at the PR can see which Issue it was meant to fix.
+
+#### GitHub Releases: Shipping Your Tags
+
+In Part 8, you'll learn about `git tag` to create a "milestone marker" like `v1.0.1`4. A GitHub Release is a user-friendly, public-facing webpage _for that tag_.
+
+While a tag is just a pointer for developers5, a **Release** is a formal package for your _users_.
+
+**How it works:**
+
+1. Tag your code: You finish your work for the new version and tag the main branch.
+    
+    Bash
+    
+    Bash
+    
+    ```
+    # Create an annotated tag for your new version
+    git tag -a v1.0.1 -m "Version 1.0.1 Bug fixes for release"
+    # Push the tag to GitHub
+    git push origin v1.0.1
+    ```
+    
+2. **Draft a New Release:** On your GitHub repository page, you go to the "Tags" or "Releases" section.
+    
+3. **Create Release from Tag:** You find your `v1.0.1` tag and click "Create Release."
+    
+4. **Add Release Notes:** This is the key part. You give it a title (e.g., "Version 1.0.1") and write a user-friendly changelog. This is where you explain, in plain English, what's new.
+    
+    - ✨ **New Features:** Added password reset via email.
+        
+    - 🐛 **Bug Fixes:** Fixed a crash when uploading images.
+        
+    - 🧹 **Maintenance:** Upgraded server dependencies.
+        
+5. **Add Assets (Optional):** If your project builds an installer, a `.zip` file, or a PDF manual, you can attach these binary files to the release.
+    
+6. **Publish:** You publish the release, and it's now a permanent, public page that users can visit to download the new version and read what's changed.
+    
+
+---
+#### Section 7.5: Mini Checklist & Key Takeaways
+
+☐ Track Work: Can you explain what a GitHub Issue is and why it's used?
+
+☐ Link Work: Do you know how to link a Pull Request to an Issue so it closes automatically?
+
+☐ Ship Work: Can you describe the difference between a git tag and a GitHub Release?
+
+☐ Release Process: Do you know the steps to create a new, user-facing Release on GitHub?
+
+- **Common Mistake**: Making a Pull Request with no context. A good PR will almost always reference an Issue to explain the _why_ behind the _what_.
+    
+- **Key Takeaway**: Issues track _what needs to be done_. Pull Requests track _how it's being done_. Releases package the _finished work_ for your users.
 
 ## **Part 8: The Power Tools - Advanced Git**
 
