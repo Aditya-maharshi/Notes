@@ -290,6 +290,17 @@ Each commit knows where it came from. This linked list is what allows Git to tra
 
 Let's get our hands dirty! This is your day-to-day Git toolkit.
 
+#### A Note on Terminal Commands
+
+Before we create our repository, you'll need to know three basic terminal commands to navigate and see your files. The `git init` command is often used _after_ these.
+
+- `mkdir <name>`: **M**a**k**e **D**i**r**ectory. This is used to create a new folder (e.g., `mkdir my-first-repo`).
+    
+- `ls`: **L**i**s**t. This command shows all the visible files and folders in your current directory. It's useful to run after you create a file to make sure it's there.
+    
+- `ls -a`: **L**i**s**t **A**ll. This shows _all_ files, including hidden ones. This is very important for Git, as it's the only way to see the hidden `.git` directory that `git init` creates.
+
+
 ### **Creating Your First Repository (`git init`)**
 
 1. Create a new folder for your project.
@@ -317,6 +328,7 @@ Initialized empty Git repository in C:/Users/YourName/my-first-repo/.git/
 ```
 
 That's it! Your folder is now a Git repository. It has a hidden `.git` subdirectory where all the magic happens. You never need to touch the files in there yourself.
+
 
 ### **The Core Workflow: Add & Commit**
 
@@ -694,8 +706,21 @@ Let's try it.
     ```
     
     The `main` branch is still pointing at the initial commit, but your new branch has moved forward.
-    
-4. **Switch back to `main`.**
+
+	**4. Renaming a Branch (git branch -m)** If you make a typo or want to rename your current branch, you can use the `-m` (move) flag.
+
+Bash
+
+Bash
+
+```
+# Renames your current branch to <new-branch-name>
+git branch -m <new-branch-name>
+```
+
+This is very commonly used to rename the old default `master` branch to `main` if your repository was created with the outdated name
+
+5. **Switch back to `main`.**
     
     Bash
     
@@ -796,7 +821,22 @@ It was a dark and stormy night.
 3. **Commit the merge.** `git commit` (You don't need a `-m` flag; Git will open an editor with a pre-written merge commit message. Just save and close it.)
     
 
-You've now successfully resolved a merge conflict!
+You've now successfully resolved a merge conflict
+
+#### Comparing Branches (git diff)
+
+Before you merge, you might want to see a summary of _all_ the differences between your feature branch and `main`. You can ask Git to show you a `diff` of the two branch "tips."
+
+Bash
+
+Bash
+
+```
+# Shows all changes between main and the add-character branch
+git diff main..add-character
+```
+
+This will output a list of all the file changes, additions, and deletions between the two branches. It's a great final review to run _before_ you type `git merge`.
 
 ---
 
@@ -1025,6 +1065,35 @@ It's not a Git command, but a feature of platforms like GitHub. A PR is a discus
     
 6. **Clean Up:** After merging, it's good practice to delete the feature branch to keep the repository tidy.
     
+
+#### Part 7.2: The Git Ecosystem: GUIs and Web Interfaces
+
+While the command line is Git's source of truth, you won't always be working in it. Your tools and platforms provide powerful visual ways to interact with Git.
+
+**1. The Web Interface (GitHub, GitLab, etc.)** You don't always need to clone a repository to make a change. Platforms like GitHub allow you to perform many Git actions directly from the website:
+
+- **Edit Files:** You can navigate to any file in a repository you have access to, click the "Edit" (pencil) icon, and make changes.
+    
+- **Commit Changes:** When you save your edit, GitHub will present a "Commit changes" dialog. This is doing a `git add` and `git commit` for you in one step, right on the remote server.
+    
+- **Usefulness:** This is perfect for quick, simple changes like fixing a typo in the `README.md`, correcting documentation, or making a small configuration tweak.
+    
+
+**2. IDE Integration (e.g., Visual Studio Code)** Modern code editors like VS Code are "Git-aware" and provide powerful visual feedback that complements your command-line workflow:
+
+- **Visual Status:** The editor's "Source Control" panel provides a live `git status`. It will show you your `M` (Modified) and `U` (Untracked) files in a list. You can click a file to see a `diff` and click a "+" icon to `git add` it.
+    
+- **Visual Merge Conflict Resolution:** This is where IDEs truly shine. When you have a merge conflict, your editor will highlight the conflicting blocks directly in the file. It will render "Accept Current Change," "Accept Incoming Change," and "Accept Both Changes" buttons above the conflict, allowing you to resolve it with a single click instead of manually deleting the `<<<<<<<`, `=======`, and `>>>>>>>` markers .
+    
+
+---
+
+#### Section 7.2: Mini Checklist & Key Takeaways
+
+☐ **Web Commits**: Do you know how to edit and commit a file directly on the GitHub website? ☐ **IDE Awareness**: Do you understand how your code editor (like VS Code) helps you by visually showing your `git status`? ☐ **Visual Merging**: Do you know that your IDE can help you resolve merge conflicts with simple buttons?
+
+- **Key Takeaway**: The command line is for _power_ and _precision_. Visual tools (websites, IDEs) are for _convenience_ and _clarity_. Use both to be an effective developer.
+
 
 ### **Common Git Workflow Models**
 
@@ -1416,6 +1485,28 @@ Mistakes happen. You might delete a branch by accident, make a messy merge, or s
     
 
 Your "lost" commit is now back as the tip of your branch. Crisis averted!
+
+#### Undoing Your Last Local Commit (The Safe Way)
+
+**The Scenario:** You just made a commit, but you realize you forgot to add a file, or you made a small mistake in the code. You _could_ use `git commit --amend`, but what if you want to completely undo the commit and get your changes back into the working directory to re-work them?
+
+This is where a "soft" reset is used. `HEAD~1` is Git's way of saying "the commit _before_ my current HEAD."
+
+Bash
+
+Bash
+
+```
+# This will "un-commit" the last commit, but...
+# ...it KEEPS all your changes in your working directory!
+git reset HEAD~1
+```
+
+**Expected Output:** After running this, `git status` will show the files from that last commit as "Changes not staged for commit" (i.e., back in your Working Directory ).
+
+This is the safest way to undo a local commit. It moves the `HEAD` pointer back one step but doesn't touch your files, giving you a complete do-over.
+
+- Contrast with `git reset --hard`: A `--hard` reset is destructive. It throws away all your uncommitted (and committed, in this case) changes and makes your files match the specified commit. `git reset HEAD~1` (with no flag) is safe and _preserves_ your work.
 
 ### **Undoing a Bad Merge**
 
